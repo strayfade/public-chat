@@ -9,7 +9,7 @@ const app = express();
 const Server = http.createServer(app);
 
 // Create a WebSocket server attached to the HTTP server
-const WebsocketServer = new WebSocket.Server({ server: Server });
+const WebsocketServer = new WebSocket.Server({ port: 23828 })
 
 // Middleware to serve static files (e.g., HTML)
 app.use(express.static('public'));
@@ -47,6 +47,7 @@ WebsocketServer.on('connection', async (Websocket) => {
     });
 });
 
-Server.listen(3000, () => {
-    console.log('Server is listening on http://localhost:3000');
-});
+if (process.argv[2])
+    Server.listen(process.argv[2])
+else
+    Server.listen(process.env.PORT)

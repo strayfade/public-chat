@@ -58,7 +58,7 @@
         </div>
     </main>
     <script>
-        const socket = new WebSocket('ws://localhost:3000');
+        const socket = new WebSocket('wss://chatws.strayfade.com');
 
         socket.onmessage = (event) => {
             const messages = document.getElementsByClassName('messages-container')[0];
