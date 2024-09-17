@@ -49,5 +49,7 @@ WebsocketServer.on('connection', async (Websocket) => {
 
 if (process.argv[2])
     Server.listen(process.argv[2])
-else
+else if (process.env.PORT)
     Server.listen(process.env.PORT)
+else 
+    Server.listen(3000)

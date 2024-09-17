@@ -2,12 +2,16 @@
 
 <head>
     <style>
+        :root {
+            --background: black;
+            --foreground: white;
+        }
         body {
             margin: 0;
             overflow: hidden;
             font-family: monospace;
-            background: white;
-            color: black;
+            background: var(--background);
+            color: var(--foreground);
         }
 
         main {
@@ -20,7 +24,7 @@
 
         .messages-container {
             width: 100vw;
-            height: calc(100vh - 100px - 40px);
+            height: calc(100vh - 50px - 40px);
             overflow-y: scroll;
             padding-bottom: 40px;
         }
@@ -30,20 +34,23 @@
             height: 100px;
         }
 
-        .send-container input {
+        .send-container input, .send-container input:active, .send-container input:focus {
             width: calc(100vw - 80px);
             border: none;
-            border-top: 1px solid black;
-            height: calc(100px - 40px);
+            border-top: 1px solid var(--foreground);
+            height: calc(50px - 40px);
             padding: 20px 40px;
-            font-size: 20px;
+            font-size: 10px;
             font-family: monospace;
+            background: var(--background);
+            color: var(--foreground);
+            outline: none;
         }
 
         .message {
-            padding: 40px;
+            padding: 10px;
             padding-bottom: 0px;
-            font-size: 20px;
+            font-size: 10px;
         }
     </style>
 </head>
@@ -54,7 +61,7 @@
 
         </div>
         <div class="send-container">
-            <input type="text" id="send-input" />
+            <input type="text" id="send-input" placeholder="Type message"/>
         </div>
     </main>
     <script>
@@ -64,6 +71,7 @@
             const messages = document.getElementsByClassName('messages-container')[0];
             const Lines = event.data.toString().split("\u0000")
             for (const Line of Lines) {
+                if (Line.length < 2) continue;
                 let message = document.createElement('div');
                 message.className = "message"
                 message.textContent = Line;
