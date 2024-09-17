@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: monospace;
+            background: white;
+            color: black;
+        }
+
+        main {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .messages-container {
+            width: 100vw;
+            height: calc(100vh - 100px - 40px);
+            overflow-y: scroll;
+            padding-bottom: 40px;
+        }
+
+        .send-container {
+            width: 100vw;
+            height: 100px;
+        }
+
+        .send-container input {
+            width: calc(100vw - 80px);
+            border: none;
+            border-top: 1px solid black;
+            height: calc(100px - 40px);
+            padding: 20px 40px;
+            font-size: 20px;
+            font-family: monospace;
+        }
+
+        .message {
+            padding: 40px;
+            padding-bottom: 0px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="messages-container">
+
+        </div>
+        <div class="send-container">
+            <input type="text" id="send-input" />
+        </div>
+    </main>
+    <script>
+        const socket = new WebSocket('ws://localhost:3000');
+
+        socket.onmessage = (event) => {
+            const messages = document.getElementsByClassName('messages-container')[0];
+            const Lines = event.data.toString().split("\u0000")
+            for (const Line of Lines) {
+                let message = document.createElement('div');
+                message.className = "message"
+                message.textContent = Line;
+                messages.appendChild(message);
+            }
+            messages.scrollTop = messages.scrollHeight
+        };
+
+        socket.onopen = () => {
+            socket.send(`\u0000`)
+        }
+
+        document.getElementById('send-input').addEventListener("keydown", (event) => {
+            if (event.keyCode == 13 || event.key == "Enter") {
+                socket.send(document.getElementById('send-input').value)
+                document.getElementById('send-input').value = ""
+            }
+        })
+    </script>
+</body>
