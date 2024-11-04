@@ -6,6 +6,7 @@
             --background: black;
             --foreground: white;
         }
+
         body {
             margin: 0;
             overflow: hidden;
@@ -24,22 +25,30 @@
 
         .messages-container {
             width: 100vw;
-            height: calc(100vh - 50px - 40px);
+            height: calc(100vh - 50px - 10px);
             overflow-y: scroll;
             padding-bottom: 40px;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .send-container {
             width: 100vw;
-            height: 100px;
+            height: max-content;
+            position: absolute;
+            bottom: 0;
+            left: 0;
         }
 
-        .send-container input, .send-container input:active, .send-container input:focus {
-            width: calc(100vw - 80px);
+        .send-container input,
+        .send-container input:active,
+        .send-container input:focus {
+            width: calc(100vw - 40px);
             border: none;
             border-top: 1px solid var(--foreground);
             height: calc(50px - 40px);
-            padding: 20px 40px;
+            padding: 20px;
             font-size: 10px;
             font-family: monospace;
             background: var(--background);
@@ -48,9 +57,17 @@
         }
 
         .message {
+            max-width: 500px;
             padding: 10px;
             padding-bottom: 0px;
             font-size: 10px;
+            transition: 250ms;
+            opacity: 1;
+        }
+
+        .message-fadein {
+            padding-left: 0;
+            opacity: 0;
         }
     </style>
 </head>
@@ -61,21 +78,29 @@
 
         </div>
         <div class="send-container">
-            <input type="text" id="send-input" placeholder="Type message"/>
+            <input type="text" id="send-input" placeholder="Type message" />
         </div>
     </main>
     <script>
-        const socket = new WebSocket('wss://chatws.strayfade.com');
+        const socket = new WebSocket('ws://localhost:23828'/*'wss://chatws.strayfade.com'*/);
 
-        socket.onmessage = (event) => {
+        let firstRequest = true
+        socket.onmessage = async (event) => {
             const messages = document.getElementsByClassName('messages-container')[0];
             const Lines = event.data.toString().split("\u0000")
             for (const Line of Lines) {
                 if (Line.length < 2) continue;
                 let message = document.createElement('div');
-                message.className = "message"
+                message.className = "message message-fadein"
                 message.textContent = Line;
                 messages.appendChild(message);
+                if (!firstRequest) {
+                    await new Promise(r => setTimeout(r, 100));
+                }
+                message.classList.remove("message-fadein")
+            }
+            if (firstRequest) {
+                firstRequest = false
             }
             messages.scrollTop = messages.scrollHeight
         };

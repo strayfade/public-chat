@@ -21,20 +21,25 @@ app.get('/', (req, res) => {
 
 const fs = require('fs').promises
 const DataPath = path.join(__dirname, "messages.bin")
+const bcrypt = require('bcrypt');
+const salt = `$2b$10$YMjaZDiSN0CD8VKgRkjete`
 const SaveMessage = async (Message) => {
-    await fs.appendFile(DataPath, `\u0000${Message}`, { encoding: "utf-8" })
+    await fs.appendFile(DataPath, Message, { encoding: "utf-8" })
 }
 const GetAllMessages = async () => {
     return await fs.readFile(DataPath, { encoding: "utf-8" })
 }
 
-WebsocketServer.on('connection', async (Websocket) => {
+WebsocketServer.on('connection', async (Websocket, Request) => {
     Websocket.on('message', async (Message) => {
         if (Message.toString() == `\u0000`) {
             Websocket.send(await GetAllMessages())
         }
         else {
-            SaveMessage(Message.toString())
+            let hash = (await bcrypt.hash(Request.socket.remoteAddress, salt))
+            hash = hash.toString().substring(hash.length - 10, hash.length)
+            Message = `\u0000[${hash}] ${Message.toString()}`
+            SaveMessage(Message)
             WebsocketServer.clients.forEach(Client => {
                 if (Client.readyState === WebSocket.OPEN) {
                     Client.send(Message.toString());
